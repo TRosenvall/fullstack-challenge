@@ -1,14 +1,16 @@
 import React from 'react';
 import './DealFilters.css';
-import { Deal } from '../Models/deal'; // Import Deal interface
+import { Deal } from '../Models/deal';
 
 interface DealFiltersProps {
+  selectedOrganizationId: number | null;
   onFilterByType: (type: Deal['status'] | 'all') => void;
   onFilterByYear: (year: number | 'all') => void;
-  deals: Deal[]; // To get available years
+  deals: Deal[];
+  onCreateNewDealClick: () => void;
 }
 
-const DealFilters: React.FC<DealFiltersProps> = ({ onFilterByType, onFilterByYear, deals }) => {
+const DealFilters: React.FC<DealFiltersProps> = ({ selectedOrganizationId, onFilterByType, onFilterByYear, deals, onCreateNewDealClick }) => {
   const dealStages: (Deal['status'] | 'all')[] = ['all', 'build_proposal', 'pitch_proposal', 'negotiation', 'awaiting_signoff', 'signed', 'cancelled', 'lost'];
 
   const updatedYears = ['all', ...new Set(deals
@@ -43,6 +45,10 @@ const DealFilters: React.FC<DealFiltersProps> = ({ onFilterByType, onFilterByYea
           ))}
         </select>
       </div>
+
+      <button onClick={onCreateNewDealClick} className="create-deal-button" disabled={!selectedOrganizationId || selectedOrganizationId === 0}>
+        Create New Deal
+      </button>
     </div>
   );
 };

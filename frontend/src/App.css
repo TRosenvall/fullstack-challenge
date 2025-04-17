@@ -90,3 +90,12 @@
 .organization-buttons button:hover {
   background-color: #e0e0e0;
 }
+
+.deal-creation-date-selector {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.deal-creation-value-selector {
+  padding-top: 10px;
+}
