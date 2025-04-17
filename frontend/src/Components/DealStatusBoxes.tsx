@@ -8,7 +8,6 @@ interface DealStatusBoxesProps {
   deals: Deal[];
   activeFilterType: Deal['status'] | 'all';
   organizationAccounts: Account[]
-  organizationDeals: Deal[]
 }
 
 const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({ selectedOrganizationId, deals, activeFilterType }) => {
@@ -44,6 +43,7 @@ const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({ selectedOrganizationI
             <p className="deal-count">
               {selectedOrganizationId != null && selectedOrganizationId !== 0 ? dealsByStage[stage].length : 0} Deals
             </p>
+            <hr/>
             {renderNumberList()}
           </div>
         ))
@@ -56,6 +56,7 @@ const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({ selectedOrganizationI
               <p className="deal-count">
                 {selectedOrganizationId != null && selectedOrganizationId !== 0 ? dealsByStage[stage].length : 0} Deals
               </p>
+              <hr/>
               {renderNumberList()}
             </div>
           ))
