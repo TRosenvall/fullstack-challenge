@@ -7,6 +7,7 @@ interface OrganizationDropdownProps {
   onOrganizationChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   onNewOrganizationClick: () => void;
   onDeleteOrganizationClick: () => void;
+  resetDropdown: boolean;
 }
 
 const OrganizationDropdown: React.FC<OrganizationDropdownProps> = ({
@@ -15,10 +16,13 @@ const OrganizationDropdown: React.FC<OrganizationDropdownProps> = ({
   onOrganizationChange,
   onNewOrganizationClick,
   onDeleteOrganizationClick,
+  resetDropdown,
 }) => {
+  const dropdownValue = resetDropdown ? "" : (selectedOrganizationId === null ? "" : selectedOrganizationId);
+
   return (
     <div className="organization-dropdown-container">
-      <select onChange={onOrganizationChange} defaultValue={selectedOrganizationId === null ? "" : selectedOrganizationId}>
+      <select value={dropdownValue} onChange={onOrganizationChange}>
         <option value="" disabled>Select Organization</option>
         {organizations.map((org) => (
           <option key={org.id} value={org.id}>

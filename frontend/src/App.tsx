@@ -7,15 +7,16 @@ import { Deal } from './Models/deal';
 
 const App: React.FC = () => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [selectedOrganizationId, setSelectedOrganizationId] = useState<number | null>(null);
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<number | null>(null); // Still tracks the actual selection
   const [selectedOrganizationName, setSelectedOrganizationName] = useState<string>("Organization");
   const [showNewOrgModal, setShowNewOrgModal] = useState<boolean>(false);
   const [newOrgName, setNewOrgName] = useState<string>('');
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
-  const [allDeals, setAllDeals] = useState<Deal[]>([]); // Store all fetched deals
-  const [filteredDeals, setFilteredDeals] = useState<Deal[]>([]); // Store deals after filtering
+  const [allDeals, setAllDeals] = useState<Deal[]>([]);
+  const [filteredDeals, setFilteredDeals] = useState<Deal[]>([]);
   const [filterType, setFilterType] = useState<Deal['status'] | 'all'>('all');
   const [filterYear, setFilterYear] = useState<number | 'all'>('all');
+  const [resetDropdown, setResetDropdown] = useState<boolean>(false);
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const LOCAL_STORAGE_KEY = 'lastSelectedOrganizationId';
 
@@ -32,7 +33,7 @@ const App: React.FC = () => {
   }, [organizations]);
 
   useEffect(() => {
-    applyFilters(); // Apply filters whenever allDeals or filter values change
+    applyFilters();
   }, [allDeals, filterType, filterYear]);
 
   const fetchOrganizations = async () => {
@@ -47,7 +48,6 @@ const App: React.FC = () => {
   const fetchDeals = async () => {
     try {
       const response = await axios.get<Deal[]>(`${apiUrl}/deals`);
-      // Assuming your Deal interface has an 'updated_at' property (e.g., a string in ISO format)
       setAllDeals(response.data);
     } catch (error) {
       console.error('Error fetching deals:', error);
@@ -60,28 +60,29 @@ const App: React.FC = () => {
     const selectedOrg = organizations.find(org => org.id === selectedId);
     setSelectedOrganizationName(selectedOrg ? selectedOrg.name : "Organization");
     localStorage.setItem(LOCAL_STORAGE_KEY, selectedId.toString());
-    // In the future, you might want to filter deals based on the selected organization here
+    setResetDropdown(true);
+    setTimeout(() => setResetDropdown(true), 0);
+    // TODO: - Rerender Deals
   };
 
   const handleFilterByType = (type: Deal['status'] | 'all') => {
     setFilterType(type);
+    setResetDropdown(false);
   };
 
   const handleFilterByYear = (year: number | 'all') => {
     setFilterYear(year);
+    setResetDropdown(false);
   };
 
   const applyFilters = () => {
     let filtered = [...allDeals];
-
     if (filterType !== 'all') {
       filtered = filtered.filter(deal => deal.status === filterType);
     }
-
     if (filterYear !== 'all') {
       filtered = filtered.filter(deal => new Date(deal.updated_at).getFullYear() === filterYear);
     }
-
     setFilteredDeals(filtered);
   };
 
@@ -92,6 +93,7 @@ const App: React.FC = () => {
   const handleCloseNewOrgModal = () => {
     setShowNewOrgModal(false);
     setNewOrgName('');
+    setResetDropdown(false);
   };
 
   const handleNewOrgNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,6 +107,9 @@ const App: React.FC = () => {
         await fetchOrganizations();
         setShowNewOrgModal(false);
         setNewOrgName('');
+        setResetDropdown(true);
+        setTimeout(() => setResetDropdown(false), 0);
+        // Optionally, you might want to select the new organization
       } catch (error) {
         console.error('Error creating organization:', error);
       }
@@ -120,6 +125,7 @@ const App: React.FC = () => {
 
   const handleCloseDeleteConfirmModal = () => {
     setShowDeleteConfirmModal(false);
+    setResetDropdown(false);
   };
 
   const handleDeleteConfirmed = async () => {
@@ -131,6 +137,8 @@ const App: React.FC = () => {
         setSelectedOrganizationName("Organization");
         localStorage.removeItem(LOCAL_STORAGE_KEY);
         setShowDeleteConfirmModal(false);
+        setResetDropdown(true);
+        setTimeout(() => setResetDropdown(false), 0);
       } catch (error) {
         console.error('Error deleting organization:', error);
       }
@@ -149,6 +157,7 @@ const App: React.FC = () => {
         deals={filteredDeals}
         onFilterByType={handleFilterByType}
         onFilterByYear={handleFilterByYear}
+        resetDropdown={resetDropdown} // Pass the new reset prop
       />
 
       {showNewOrgModal && (

@@ -2,7 +2,7 @@ import React from 'react';
 import OrganizationDropdown from './OrganizationDropDown';
 import './DealDashboard.css';
 import DealStatusBoxes from './DealStatusBoxes';
-import DealFilters from './DealFilters'; // Import the new component
+import DealFilters from './DealFilters';
 import { Deal } from '../Models/deal';
 
 interface DashboardProps {
@@ -15,6 +15,7 @@ interface DashboardProps {
   deals: Deal[];
   onFilterByType: (type: Deal['status'] | 'all') => void;
   onFilterByYear: (year: number | 'all') => void;
+  resetDropdown: boolean;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -27,6 +28,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   deals,
   onFilterByType,
   onFilterByYear,
+  resetDropdown,
 }) => {
   return (
     <div className="dashboard-container">
@@ -41,6 +43,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             onOrganizationChange={onOrganizationChange}
             onNewOrganizationClick={onNewOrganizationClick}
             onDeleteOrganizationClick={onDeleteOrganizationClick}
+            resetDropdown={resetDropdown}
           />
         </div>
       </div>
