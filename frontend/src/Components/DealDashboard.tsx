@@ -65,8 +65,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         <div className="top-right-controls">
           <div className="deal-summary-box">
             <div>Potential: {formatAsCurrency(potentialSum, 'en-US', 'USD')}</div>
-            <div>Actual: {formatAsCurrency(potentialSum, 'en-US', 'USD')}</div>
-            <div>Lost/Cancelled: {formatAsCurrency(potentialSum, 'en-US', 'USD')}</div>
+            <div>Actual: {formatAsCurrency(actualSum, 'en-US', 'USD')}</div>
+            <div>Lost/Cancelled: {formatAsCurrency(unavailableSum, 'en-US', 'USD')}</div>
           </div>
           <OrganizationDropdown
             organizations={organizations}

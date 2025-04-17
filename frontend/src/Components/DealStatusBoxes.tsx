@@ -67,7 +67,7 @@ const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({
               <div className="deal-info">
                 <span className="deal-account">{ 
                   (account?.name === null || account?.name === undefined) ? "Unknown" : 
-                  (account.name.length < 12 || isFiltered) ? account?.name : account?.name.substring(0, 6) + "..."
+                  (account.name.length < 12 || isFiltered) ? account?.name : account?.name.substring(0, 11) + "..."
                 }</span>
                 <span className="deal-value">{formatAsCurrency(deal.value, 'en-US', 'USD')}</span>
               </div>

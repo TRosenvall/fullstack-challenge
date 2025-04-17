@@ -48,7 +48,7 @@ export default (db: Database.Database) => {
       res.status(400).json({ error: 'Account ID is required and must be a number' });
       return;
     }
-    if (!value || typeof value !== 'number') {
+    if (value === null || typeof value !== 'number' || isNaN(value)) {
       res.status(400).json({ error: 'Deal value is required and must be a number' });
       return;
     }

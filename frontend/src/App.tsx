@@ -207,7 +207,7 @@ const App: React.FC = () => {
     setShowNewDealModal(false);
     setNewDealCreationDate(2025);
     setNewAccountName('');
-    setNewDealValue(0);
+    setNewDealValue(0.00);
     await fetchOrganizationAccounts()
   };
 
@@ -219,12 +219,8 @@ const App: React.FC = () => {
     setNewAccountName(event.target.value);
   };
 
-  const handleNewDealValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewDealValue(event.target.value === '' ? '' : parseFloat(event.target.value));
-  };
-
   const handleSaveNewDeal = async () => {
-    if (!newDealCreationDate || !newAccountName || !(typeof newDealValue === 'number')) {
+    if (!newDealCreationDate || !newAccountName || newDealValue === null || isNaN(newDealValue as number)) {
       alert("Please fill in all the details")
     }
     var accountNames: String[] = []
@@ -303,7 +299,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleNewDealModalValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewDealValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value.replace(/[^0-9.]/g, ''); // allow digits and decimal
     setDealInput(input);
   
@@ -360,7 +356,7 @@ const App: React.FC = () => {
                   type="text"
                   id="deal-value"
                   value={dealInput}
-                  onChange={handleNewDealModalValueChange}
+                  onChange={handleNewDealValueChange}
                   onBlur={handleNewDealValueBlur} // format when they leave the field
                   required
                 />
