@@ -43,15 +43,65 @@ const Dashboard: React.FC<DashboardProps> = ({
   handleUpdateDealStatus,
   formatAsCurrency,
 }) => {
-  // Calculate sums based on deal status
+  
+  /**
+   * Calculates the total potential value of all deals associated with the 
+   * current organization. Potential deals are those with a status of 
+   * 'build_proposal', 'pitch_proposal', 'negotiation', or 'awaiting_signoff'.
+   *
+   * @constant potentialSum
+   * @type {number}
+   * @readonly
+   *
+   * @remarks
+   * - Filters the `allOrganizationDeals` array to include only deals with 
+   * statuses indicating a potential sale.
+   * - Uses the `reduce` method to sum the `value` property of these potential 
+   * deals.
+   * - The initial value of the accumulator in the `reduce` method is 
+   * implicitly `0`.
+   */
   const potentialSum = allOrganizationDeals
     .filter(deal => ['build_proposal', 'pitch_proposal', 'negotiation', 'awaiting_signoff'].includes(deal.status))
     .reduce((sum, deal) => sum + deal.value, 0);
 
+  /**
+   * Calculates the total actual value of all deals associated with the current 
+   * organization. Actual deals are those with a status of 'signed'.
+   *
+   * @constant actualSum
+   * @type {number}
+   * @readonly
+   *
+   * @remarks
+   * - Filters the `allOrganizationDeals` array to include only deals with the 
+   * status 'signed'.
+   * - Uses the `reduce` method to sum the `value` property of these signed 
+   * deals.
+   * - The initial value of the accumulator in the `reduce` method is 
+   * implicitly `0`.
+   */
   const actualSum = allOrganizationDeals
     .filter(deal => deal.status === 'signed')
     .reduce((sum, deal) => sum + deal.value, 0);
 
+  /**
+   * Calculates the total value of all deals associated with the current 
+   * organization that are no longer available.
+   * Unavailable deals are those with a status of 'cancelled' or 'lost'.
+   *
+   * @constant unavailableSum
+   * @type {number}
+   * @readonly
+   *
+   * @remarks
+   * - Filters the `allOrganizationDeals` array to include only deals with a 
+   * status of 'cancelled' or 'lost'.
+   * - Uses the `reduce` method to sum the `value` property of these unavailable 
+   * deals.
+   * - The initial value of the accumulator in the `reduce` method is 
+   * implicitly `0`.
+   */
   const unavailableSum = allOrganizationDeals
     .filter(deal => ['cancelled', 'lost'].includes(deal.status))
     .reduce((sum, deal) => sum + deal.value, 0);

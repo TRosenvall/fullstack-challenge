@@ -11,8 +11,46 @@ interface DealFiltersProps {
 }
 
 const DealFilters: React.FC<DealFiltersProps> = ({ selectedOrganizationId, onFilterByType, onFilterByYear, allOrganizationDeals, onCreateNewDealClick }) => {
+  /**
+   * An array defining the possible stages for a deal, including an 'all' option 
+   * for filtering. Each stage corresponds to a specific status a deal can have 
+   * in the sales process.
+   *
+   * @constant dealStages
+   * @type {(Deal['status'] | 'all')[]}
+   * @readonly
+   *
+   * @remarks
+   * - Includes 'all' as the first element to allow filtering for all deal 
+   * statuses.
+   * - The subsequent elements are the valid `Deal['status']` values, 
+   * representing different stages like proposal building, pitching, negotiation, 
+   * etc.
+   * - The order of stages reflects a typical sales pipeline flow, with 
+   * 'cancelled' and 'lost' representing terminal negative outcomes.
+   */
   const dealStages: (Deal['status'] | 'all')[] = ['all', 'build_proposal', 'pitch_proposal', 'negotiation', 'awaiting_signoff', 'signed', 'cancelled', 'lost'];
 
+  /**
+   * An array containing the unique years of creation for all deals associated 
+   * with the current organization, along with an 'all' option for filtering. 
+   * The years are sorted in descending order, with 'all' appearing first.
+   *
+   * @constant availableYears
+   * @type {(number | 'all')[]}
+   * @readonly
+   *
+   * @remarks
+   * - Starts with an 'all' string to allow filtering for all years.
+   * - Maps over the `allOrganizationDeals` array to extract the 
+   * `year_of_creation` for each deal.
+   * - Uses a `Set` to ensure only unique year values are included.
+   * - Sorts the resulting array:
+   * - 'all' is placed at the beginning.
+   * - Number years are sorted in descending order (newest to oldest).
+   * - Handles potential type differences between 'all' and number years during 
+   * sorting.
+   */
   const availableYears = ['all', ...new Set(allOrganizationDeals.map(deal => deal.year_of_creation))].sort((a, b) => {
     if (a === 'all') return -1;
     if (b === 'all') return 1;
