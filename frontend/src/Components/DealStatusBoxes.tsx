@@ -10,7 +10,7 @@ interface DealStatusBoxesProps {
   organizationAccounts: Account[]
 }
 
-const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({ selectedOrganizationId, deals, activeFilterType }) => {
+const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({ selectedOrganizationId, deals, activeFilterType, organizationAccounts }) => {
   const dealStages: Deal['status'][] = [
     'build_proposal',
     'pitch_proposal',
@@ -26,13 +26,23 @@ const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({ selectedOrganizationI
     return acc;
   }, {} as Record<Deal['status'], Deal[]>);
 
-  const renderNumberList = () => (
-    <ul className="number-list">
-      {Array.from({ length: 11 }, (_, i) => (
-        <li key={i}>{i}</li>
-      ))}
-    </ul>
-  );
+  const renderDeals = (stage: typeof dealStages[number]) => {
+    const filteredDeals = deals.filter(deal => deal.status === stage);
+  
+    return (
+      <ul className="deal-list">
+        {filteredDeals.map((deal) => {
+          const account = organizationAccounts.find((acc) => acc.id === deal.account_id);
+          return (
+            <li key={deal.id} className="deal-row">
+              <span className="deal-account">{account?.name}</span>
+              <span className="deal-value">${deal.value.toLocaleString()}</span>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  };
 
   return (
     <div className="deal-status-boxes-container">
@@ -44,7 +54,7 @@ const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({ selectedOrganizationI
               {selectedOrganizationId != null && selectedOrganizationId !== 0 ? dealsByStage[stage].length : 0} Deals
             </p>
             <hr/>
-            {renderNumberList()}
+            {renderDeals(stage)}
           </div>
         ))
       ) : (
@@ -57,7 +67,7 @@ const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({ selectedOrganizationI
                 {selectedOrganizationId != null && selectedOrganizationId !== 0 ? dealsByStage[stage].length : 0} Deals
               </p>
               <hr/>
-              {renderNumberList()}
+              {renderDeals(stage)}
             </div>
           ))
       )}

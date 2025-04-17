@@ -26,6 +26,7 @@ const App: React.FC = () => {
   const [newDealValue, setNewDealValue] = useState<number | ''>(0);
   const [newDealStatus, setNewDealStatus] = useState<Deal['status']>('build_proposal');
   const [selectedOrganizationAccounts, setOrganizationAccounts] = useState<Account[]>([]);
+  const [allOrganizationDeals, setAllOrganizationDeals] = useState<Deal[]>([]);
   const DEAL_STATUS_OPTIONS: Deal['status'][] = [
     'build_proposal',
     'pitch_proposal',
@@ -46,6 +47,7 @@ const App: React.FC = () => {
       const initialOrg = organizations.find(org => org.id === parsedId);
       setSelectedOrganizationName(initialOrg ? initialOrg.name : "Organization");
     }
+    fetchOrganizationAccounts()
   }, [organizations]);
 
   useEffect(() => {
@@ -70,23 +72,29 @@ const App: React.FC = () => {
     }
   };
 
-  const handleOrganizationChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleOrganizationChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = parseInt(event.target.value);
+    updateSelectedOrganization(selectedId)
+  };
+
+  const updateSelectedOrganization = async (selectedId: number) => {
     setSelectedOrganizationId(selectedId === 0 ? null : selectedId);
     const selectedOrg = organizations.find(org => org.id === selectedId);
     setSelectedOrganizationName(selectedOrg ? selectedOrg.name : "Organization");
     localStorage.setItem(LOCAL_STORAGE_KEY, selectedId.toString());
     setResetDropdown(true);
     setTimeout(() => setResetDropdown(true), 0);
-    // TODO: - Rerender Deals
-  };
+    await fetchOrganizationAccounts();
+  }
 
-  const handleFilterByType = (type: Deal['status'] | 'all') => {
+  const handleFilterByType = async (type: Deal['status'] | 'all') => {
+    await fetchOrganizationAccounts();
     setFilterType(type);
     setResetDropdown(false);
   };
 
-  const handleFilterByYear = (year: number | 'all') => {
+  const handleFilterByYear = async (year: number | 'all') => {
+    await fetchOrganizationAccounts();
     setFilterYear(year);
     setResetDropdown(false);
   };
@@ -94,15 +102,15 @@ const App: React.FC = () => {
   const applyFilters = async () => {
     let filtered = [...allDeals];
 
-    await fetchOrganizationAccounts()
-    const accountIds = new Set(selectedOrganizationAccounts.map(account => account.id));
-    filtered = filtered.filter(deal => accountIds.has(deal.account_id));
+    const accountIds = selectedOrganizationAccounts.map(account => account.id);
+    filtered = filtered.filter(deal => accountIds.includes(deal.account_id));
+    setAllOrganizationDeals(filtered);
 
     if (filterType !== 'all') {
       filtered = filtered.filter(deal => deal.status === filterType);
     }
     if (filterYear !== 'all') {
-      filtered = filtered.filter(deal => new Date(deal.updated_at).getFullYear() === filterYear);
+      filtered = filtered.filter(deal => deal.year_of_creation === filterYear);
     }
     setFilteredDeals(filtered);
   };
@@ -117,8 +125,9 @@ const App: React.FC = () => {
     setResetDropdown(false);
   };
 
-  const handleNewOrgNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewOrgNameChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setNewOrgName(event.target.value);
+    await fetchOrganizationAccounts();
   };
 
   const handleCreateNewOrganization = async () => {
@@ -130,7 +139,11 @@ const App: React.FC = () => {
         setNewOrgName('');
         setResetDropdown(true);
         setTimeout(() => setResetDropdown(false), 0);
-        // Optionally, you might want to select the new organization
+        
+        const newOrg = (await axios.get<Organization[]>(`${apiUrl}/organizations`)).data.find(organization => organization.name == newOrgName)
+        if (newOrg) {
+          await updateSelectedOrganization(newOrg.id)
+        }
       } catch (error) {
         console.error('Error creating organization:', error);
       }
@@ -152,6 +165,25 @@ const App: React.FC = () => {
   const handleDeleteConfirmed = async () => {
     if (selectedOrganizationId !== null) {
       try {
+        let organizationAccountIds = (await axios.get<Account[]>(`${apiUrl}/accounts`)).data
+          .filter(account => account.id === selectedOrganizationId)
+          .map(account => account.id)
+        var dealIds: number[] = [];
+        var deals = [...allDeals];
+        for (var i = 0; i < deals.length; i++) {
+          if (organizationAccountIds.includes(deals[i].account_id)) {
+            dealIds.push(deals[i].id)
+          }
+        }
+
+        for (var i = 0; i < dealIds.length; i++) {
+          await axios.delete(`${apiUrl}/deals/${dealIds[i]}`);
+        }
+
+        for (var i = 0; i < organizationAccountIds.length; i++) {
+          await axios.delete(`${apiUrl}/accounts/${organizationAccountIds[i]}`);
+        }
+
         await axios.delete(`${apiUrl}/organizations/${selectedOrganizationId}`);
         await fetchOrganizations();
         setSelectedOrganizationId(null);
@@ -170,11 +202,12 @@ const App: React.FC = () => {
     setShowNewDealModal(true);
   };
 
-  const handleCloseNewDealModal = () => {
+  const handleCloseNewDealModal = async () => {
     setShowNewDealModal(false);
     setNewDealCreationDate(2025);
     setNewAccountName('');
     setNewDealValue(0);
+    await fetchOrganizationAccounts()
   };
 
   const handleNewDealCreationDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -204,7 +237,7 @@ const App: React.FC = () => {
 
     if (!accountNames.includes(newAccountName)) {
       try {
-      await axios.post<Account>(`${apiUrl}/accounts`, { name: newAccountName, organization_id: selectedOrganizationId });
+        await axios.post<Account>(`${apiUrl}/accounts`, { name: newAccountName, organization_id: selectedOrganizationId });
       } catch(error) {
         alert("Unable to create new account")
         alert(error);
@@ -229,14 +262,13 @@ const App: React.FC = () => {
       return
     }
 
-    // Handle successful creation (e.g., refresh deals list, show success message)
     fetchDeals();
     handleCloseNewDealModal();
   };
 
   const fetchOrganizationAccounts = async () => {
     try {
-      let organizationAccounts = (await axios.get<Account[]>(`${apiUrl}/accounts`)).data.filter(account => account.id === selectedOrganizationId)
+      let organizationAccounts = (await axios.get<Account[]>(`${apiUrl}/accounts`)).data.filter(account => account.organization_id === selectedOrganizationId)
       setOrganizationAccounts(organizationAccounts)
     } catch(error) {
       alert(error)
@@ -259,6 +291,7 @@ const App: React.FC = () => {
         onCreateNewDealClick={handleCreateNewDealClick}
         activeFilterType={filterType}
         organizationAccounts={selectedOrganizationAccounts}
+        allOrganizationDeals={allOrganizationDeals}
       />
 
       {showNewDealModal && (

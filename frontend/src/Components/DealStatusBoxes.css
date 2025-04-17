@@ -72,3 +72,24 @@
   /* Example style */
   background-color: #ffebee; /* Light red */
 }
+
+.deal-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.deal-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.deal-account {
+  font-weight: 500;
+}
+
+.deal-value {
+  color: #333;
+}

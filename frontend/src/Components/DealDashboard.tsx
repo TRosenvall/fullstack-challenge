@@ -20,6 +20,7 @@ interface DashboardProps {
   onCreateNewDealClick: () => void;
   activeFilterType: Deal['status'] | 'all';
   organizationAccounts: Account[];
+  allOrganizationDeals: Deal[];
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -36,6 +37,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   onCreateNewDealClick,
   activeFilterType,
   organizationAccounts,
+  allOrganizationDeals,
 }) => {
   return (
     <div className="dashboard-container">
@@ -59,7 +61,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         selectedOrganizationId={selectedOrganizationId}
         onFilterByType={onFilterByType}
         onFilterByYear={onFilterByYear}
-        deals={deals}
+        allOrganizationDeals={allOrganizationDeals}
         onCreateNewDealClick={onCreateNewDealClick}
       />
       <DealStatusBoxes 
