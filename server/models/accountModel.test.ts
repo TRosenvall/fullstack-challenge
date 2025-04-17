@@ -12,7 +12,6 @@ describe("Accounts Model Unit Tests", () => {
 
   beforeEach(() => {
     db = initializeDatabase();
-    console.log(db)
     accounts = Accounts(db);
   
     // Create a test organization to link accounts to

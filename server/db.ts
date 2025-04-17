@@ -3,7 +3,7 @@ import Database from "better-sqlite3";
 function initializeDatabase() {
   const isTestEnvironment = process.env.NODE_ENV === 'test';
   const dbPath = isTestEnvironment ? ':memory:' : "./database.sqlite";
-  const db = new Database(dbPath, { verbose: console.log });
+  const db = new Database(dbPath);
 
   // Organization Model
   db.prepare(

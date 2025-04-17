@@ -1,8 +1,8 @@
 import Database from "better-sqlite3";
 
 // In your accountModel.ts or a separate types file (e.g., types/account.d.ts)
-interface Account {
-  id: number;
+export interface Account {
+  id: number | BigInt;
   name: string;
   organization_id: number;
   created_at: Date;

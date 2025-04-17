@@ -1,29 +1,29 @@
 import Database from "better-sqlite3";
 
-interface Organization {
-  id: number;
+export interface Organization {
+  id: number | BigInt;
   name: string;
-  created_at: string; // Or Date if you handle dates as Date objects
-  updated_at: string; // Or Date if you handle dates as Date objects
+  created_at: Date;
+  updated_at: Date;
 }
 
-export const Organizations = (db: any) => ({
-  getAll: (): Organization[] => db.prepare("SELECT * FROM organizations").all(),
+export const Organizations = (db: Database.Database) => ({
+  getAll: (): Organization[] => db.prepare("SELECT * FROM organizations").all() as Organization[],
 
-  getById: (id: number): Organization =>
-    db.prepare("SELECT * FROM organizations WHERE id = ?").get(id),
+  getById: (id: number | BigInt): Organization =>
+    db.prepare("SELECT * FROM organizations WHERE id = ?").get(id) as Organization,
 
   create: (name: string) =>
     db.prepare("INSERT INTO organizations (name) VALUES (?)").run(name),
 
-  update: (id: number, name: string) =>
+  update: (id: number | BigInt, name: string) =>
     db
       .prepare(
         "UPDATE organizations SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
       )
       .run(name, id),
 
-  delete: (id: number) =>
+  delete: (id: number | BigInt) =>
     db.prepare("DELETE FROM organizations WHERE id = ?").run(id),
 });
 

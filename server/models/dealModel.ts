@@ -1,8 +1,8 @@
 import Database from "better-sqlite3";
 
 // Define the interface for a Deal object
-interface Deal {
-  id: number;
+export interface Deal {
+  id: number | BigInt;
   account_id: number;
   value: number;
   status: 'build_proposal' | 'pitch_proposal' | 'negotiation' | 'awaiting_signoff' | 'signed' | 'cancelled' | 'lost';

@@ -1,6 +1,10 @@
 import express from "express";
 import cors from "cors";
 import initializeDatabase from "./db";
+import OrganizationRoutes from "./routes/organizationRoutes";
+import AccountRoutes from "./routes/accountRoutes";
+import DealRoutes from "./routes/dealRoutes";
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -10,10 +14,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
-  const rows = db.prepare("SELECT * FROM organizations").all();
-  res.json({ message: "Welcome to the server! 🎉", rows });
-});
+app.use('/organizations', OrganizationRoutes(db));
+app.use('/accounts', AccountRoutes(db));
+app.use('/deals', DealRoutes(db));
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
