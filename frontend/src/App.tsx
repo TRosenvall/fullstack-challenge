@@ -2,29 +2,31 @@ import React, { useState, useEffect } from 'react';
 import Dashboard from './Components/DealDashboard';
 import axios from 'axios';
 import './App.css';
-
-interface Organization {
-  id: number;
-  name: string;
-}
+import { Organization } from './Models/organization';
+import { Deal } from './Models/deal';
 
 const App: React.FC = () => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOrganizationId, setSelectedOrganizationId] = useState<number | null>(null);
+  const [selectedOrganizationName, setSelectedOrganizationName] = useState<string>("Organization");
   const [showNewOrgModal, setShowNewOrgModal] = useState<boolean>(false);
   const [newOrgName, setNewOrgName] = useState<string>('');
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
+  const [deals, setDeals] = useState<Deal[]>([]);
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const LOCAL_STORAGE_KEY = 'lastSelectedOrganizationId';
 
   useEffect(() => {
     fetchOrganizations();
-    // Load the last selected organization ID from localStorage on component mount
+    fetchDeals();
     const storedId = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (storedId) {
-      setSelectedOrganizationId(parseInt(storedId, 10));
+      const parsedId = parseInt(storedId, 10);
+      setSelectedOrganizationId(parsedId);
+      const initialOrg = organizations.find(org => org.id === parsedId);
+      setSelectedOrganizationName(initialOrg ? initialOrg.name : "Organization");
     }
-  }, []);
+  }, [organizations]);
 
   const fetchOrganizations = async () => {
     try {
@@ -35,12 +37,22 @@ const App: React.FC = () => {
     }
   };
 
+  const fetchDeals = async () => {
+    try {
+      const response = await axios.get<Deal[]>(`${apiUrl}/deals`);
+      setDeals(response.data);
+    } catch (error) {
+      console.error('Error fetching deals:', error);
+    }
+  };
+
   const handleOrganizationChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = parseInt(event.target.value);
     setSelectedOrganizationId(selectedId === 0 ? null : selectedId);
-    // Store the selected ID in localStorage whenever it changes
+    const selectedOrg = organizations.find(org => org.id === selectedId);
+    setSelectedOrganizationName(selectedOrg ? selectedOrg.name : "Organization");
     localStorage.setItem(LOCAL_STORAGE_KEY, selectedId.toString());
-    // You might want to trigger a re-render of deals based on the selected organization here
+    // TODO: - Filtering
   };
 
   const handleNewOrganizationClick = () => {
@@ -60,7 +72,7 @@ const App: React.FC = () => {
     if (newOrgName.trim()) {
       try {
         await axios.post<Organization>(`${apiUrl}/organizations`, { name: newOrgName });
-        fetchOrganizations();
+        await fetchOrganizations();
         setShowNewOrgModal(false);
         setNewOrgName('');
       } catch (error) {
@@ -84,8 +96,9 @@ const App: React.FC = () => {
     if (selectedOrganizationId !== null) {
       try {
         await axios.delete(`${apiUrl}/organizations/${selectedOrganizationId}`);
-        fetchOrganizations();
+        await fetchOrganizations();
         setSelectedOrganizationId(null);
+        setSelectedOrganizationName("Organization");
         localStorage.removeItem(LOCAL_STORAGE_KEY);
         setShowDeleteConfirmModal(false);
       } catch (error) {
@@ -99,9 +112,11 @@ const App: React.FC = () => {
       <Dashboard
         organizations={organizations}
         selectedOrganizationId={selectedOrganizationId}
+        selectedOrganizationName={selectedOrganizationName}
         onOrganizationChange={handleOrganizationChange}
         onNewOrganizationClick={handleNewOrganizationClick}
         onDeleteOrganizationClick={handleDeleteOrganizationClick}
+        deals={deals}
       />
 
       {showNewOrgModal && (
