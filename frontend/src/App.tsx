@@ -23,10 +23,11 @@ const App: React.FC = () => {
   const [showNewDealModal, setShowNewDealModal] = useState<boolean>(false);
   const [newDealCreationDate, setNewDealCreationDate] = useState<number | ''>(2025);
   const [newAccountName, setNewAccountName] = useState<string>('');
-  const [newDealValue, setNewDealValue] = useState<number | ''>(0);
+  const [newDealValue, setNewDealValue] = useState<number | '' | null>(0);
   const [newDealStatus, setNewDealStatus] = useState<Deal['status']>('build_proposal');
   const [selectedOrganizationAccounts, setOrganizationAccounts] = useState<Account[]>([]);
   const [allOrganizationDeals, setAllOrganizationDeals] = useState<Deal[]>([]);
+  const [dealInput, setDealInput] = useState<string>('');
   const DEAL_STATUS_OPTIONS: Deal['status'][] = [
     'build_proposal',
     'pitch_proposal',
@@ -275,6 +276,45 @@ const App: React.FC = () => {
     }
   }
 
+  const handleUpdateDealStatus = async (dealId: number, newStatus: Deal['status']) => {
+    try {
+      await axios.put(`${apiUrl}/deals/${dealId}`, { status: newStatus });
+      fetchDeals()
+    } catch (error) {
+      console.error('Error updating deal status:', error);
+      alert(error);
+    }
+  };
+
+  const formatAsCurrency = (amount: number, locale: string = 'en-US', currency: string = 'USD'): string => {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+    }).format(amount);
+  };
+
+  const handleNewDealValueBlur = () => {
+    if (newDealValue !== null && typeof newDealValue === 'number') {
+      setDealInput(formatAsCurrency(newDealValue));
+    } else if (newDealValue !== null && typeof newDealValue === 'string') {
+      setDealInput(newDealValue)
+    } else {
+      setDealInput('');
+    }
+  };
+
+  const handleNewDealModalValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value.replace(/[^0-9.]/g, ''); // allow digits and decimal
+    setDealInput(input);
+  
+    const parsed = parseFloat(input);
+    if (!isNaN(parsed)) {
+      setNewDealValue(parsed);
+    } else {
+      setNewDealValue(null);
+    }
+  };
+
   return (
     <div className="app-container">
       <Dashboard
@@ -292,45 +332,57 @@ const App: React.FC = () => {
         activeFilterType={filterType}
         organizationAccounts={selectedOrganizationAccounts}
         allOrganizationDeals={allOrganizationDeals}
+        handleUpdateDealStatus={handleUpdateDealStatus}
+        formatAsCurrency={formatAsCurrency}
       />
 
       {showNewDealModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Create New Deal & Account</h3>
-            <label htmlFor="account-name">Account Name:</label>
-            <input type="text" id="account-name" value={newAccountName} onChange={handleNewAccountNameChange} required />
+            <div className="new-deal-modal">
+              <h3>Create New Deal & Account</h3>
+              <label htmlFor="account-name">Account Name:</label>
+              <input type="text" id="account-name" value={newAccountName} onChange={handleNewAccountNameChange} required />
 
-            <label htmlFor="deal-status">Deal Status:</label>
-            <select id="deal-status" value={newDealStatus} onChange={(e) => setNewDealStatus(e.target.value as Deal['status'])}>
-              {DEAL_STATUS_OPTIONS.map((status) => (
-                <option key={status} value={status}>
-                  {status.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
-                </option>
-              ))}
-            </select>
+              <label htmlFor="deal-status">Deal Status:</label>
+              <select className="input-field" id="deal-status" value={newDealStatus} onChange={(e) => setNewDealStatus(e.target.value as Deal['status'])}>
+                {DEAL_STATUS_OPTIONS.map((status) => (
+                  <option key={status} value={status}>
+                    {status.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                  </option>
+                ))}
+              </select>
 
-            <div className="deal-creation-value-selector">
-              <label htmlFor="deal-value">Deal Value:</label>
-              <input type="number" id="deal-value" value={newDealValue} onChange={handleNewDealValueChange} required />
-            </div>
+              <div className="deal-creation-value-selector">
+                <label htmlFor="deal-value">Deal Value:</label>
+                <input
+                  className="input-field"
+                  type="text"
+                  id="deal-value"
+                  value={dealInput}
+                  onChange={handleNewDealModalValueChange}
+                  onBlur={handleNewDealValueBlur} // format when they leave the field
+                  required
+                />
+              </div>
 
-            <div className="deal-creation-date-selector">
-              <label htmlFor="deal-creation-date">Deal Creation Year:</label>
-              <input type="number" id="deal-creation-date" value={newDealCreationDate} onChange={handleNewDealCreationDateChange} required />
-            </div>
+              <div className="deal-creation-date-selector">
+                <label htmlFor="deal-creation-date">Deal Year:</label>
+                <input className="input-field" type="number" id="deal-creation-date" value={newDealCreationDate} onChange={handleNewDealCreationDateChange} required />
+              </div>
 
-            <div className="modal-buttons">
-              <button onClick={handleSaveNewDeal}>Save Deal</button>
-              <button onClick={handleCloseNewDealModal}>Cancel</button>
+              <div className="modal-buttons">
+                <button onClick={handleSaveNewDeal}>Save Deal</button>
+                <button onClick={handleCloseNewDealModal}>Cancel</button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {showNewOrgModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="new-organization-modal-overlay">
+          <div className="new-organization-modal-content">
             <h3>Create New Organization</h3>
             <input
               type="text"
@@ -347,8 +399,8 @@ const App: React.FC = () => {
       )}
 
       {showDeleteConfirmModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="new-organization-modal-overlay">
+          <div className="new-organization-modal-content">
             <h3>Confirm Delete</h3>
             <p>Are you sure you want to delete this organization?</p>
             <div className="modal-buttons">

@@ -16,7 +16,7 @@
   border: 1px solid #eee;
   border-radius: 8px;
   padding: 15px;
-  min-width: 250px;
+  min-width: 300px;
   text-align: center;
 }
 
@@ -75,6 +75,50 @@
 .deal-item .deal-value {
   text-align: right;
   font-weight: bold;
+}
+
+.arrow-button {
+  background: none;
+  border: none;
+  font-size: 1em;
+  cursor: pointer;
+  padding: 5px;
+  color: #888;
+}
+
+.arrow-button:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.deal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.deal-row:last-child {
+  border-bottom: none;
+}
+
+.deal-info {
+  flex-grow: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 10px; /* Add some spacing around the deal info */
+}
+
+.deal-info .deal-account {
+  text-align: left;
+}
+
+.deal-info .deal-value {
+  text-align: right;
+  font-weight: bold;
+  color: #007bff;
 }
 
 /* You can add specific styles for each stage if desired */

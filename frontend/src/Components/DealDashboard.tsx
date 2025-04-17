@@ -21,6 +21,8 @@ interface DashboardProps {
   activeFilterType: Deal['status'] | 'all';
   organizationAccounts: Account[];
   allOrganizationDeals: Deal[];
+  handleUpdateDealStatus: (id: number, stage: Deal['status']) => void
+  formatAsCurrency: (amount: number, locale: string, currency: string) => string
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -38,6 +40,8 @@ const Dashboard: React.FC<DashboardProps> = ({
   activeFilterType,
   organizationAccounts,
   allOrganizationDeals,
+  handleUpdateDealStatus,
+  formatAsCurrency,
 }) => {
   // Calculate sums based on deal status
   const potentialSum = allOrganizationDeals
@@ -60,9 +64,9 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
         <div className="top-right-controls">
           <div className="deal-summary-box">
-            <div>Potential: ${potentialSum.toFixed(2)}</div>
-            <div>Actual: ${actualSum.toFixed(2)}</div>
-            <div>Lost/Cancelled: ${unavailableSum.toFixed(2)}</div>
+            <div>Potential: {formatAsCurrency(potentialSum, 'en-US', 'USD')}</div>
+            <div>Actual: {formatAsCurrency(potentialSum, 'en-US', 'USD')}</div>
+            <div>Lost/Cancelled: {formatAsCurrency(potentialSum, 'en-US', 'USD')}</div>
           </div>
           <OrganizationDropdown
             organizations={organizations}
@@ -87,6 +91,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         deals={deals} 
         activeFilterType={activeFilterType}
         organizationAccounts={organizationAccounts}
+        handleUpdateDealStatus={handleUpdateDealStatus}
+        formatAsCurrency={formatAsCurrency}
       />
     </div>
   );
