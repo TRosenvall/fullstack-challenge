@@ -166,7 +166,7 @@ const App: React.FC = () => {
     if (selectedOrganizationId !== null) {
       try {
         let organizationAccountIds = (await axios.get<Account[]>(`${apiUrl}/accounts`)).data
-          .filter(account => account.id === selectedOrganizationId)
+          .filter(account => account.organization_id === selectedOrganizationId)
           .map(account => account.id)
         var dealIds: number[] = [];
         var deals = [...allDeals];

@@ -39,6 +39,19 @@ const Dashboard: React.FC<DashboardProps> = ({
   organizationAccounts,
   allOrganizationDeals,
 }) => {
+  // Calculate sums based on deal status
+  const potentialSum = allOrganizationDeals
+    .filter(deal => ['build_proposal', 'pitch_proposal', 'negotiation', 'awaiting_signoff'].includes(deal.status))
+    .reduce((sum, deal) => sum + deal.value, 0);
+
+  const actualSum = allOrganizationDeals
+    .filter(deal => deal.status === 'signed')
+    .reduce((sum, deal) => sum + deal.value, 0);
+
+  const unavailableSum = allOrganizationDeals
+    .filter(deal => ['cancelled', 'lost'].includes(deal.status))
+    .reduce((sum, deal) => sum + deal.value, 0);
+
   return (
     <div className="dashboard-container">
       <div className="top-bar">
@@ -46,6 +59,11 @@ const Dashboard: React.FC<DashboardProps> = ({
           <strong>{selectedOrganizationName}</strong>
         </div>
         <div className="top-right-controls">
+          <div className="deal-summary-box">
+            <div>Potential: ${potentialSum.toFixed(2)}</div>
+            <div>Actual: ${actualSum.toFixed(2)}</div>
+            <div>Lost/Cancelled: ${unavailableSum.toFixed(2)}</div>
+          </div>
           <OrganizationDropdown
             organizations={organizations}
             selectedOrganizationId={selectedOrganizationId}

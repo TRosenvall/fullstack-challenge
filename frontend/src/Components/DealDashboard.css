@@ -11,7 +11,11 @@
 
 .top-left-organization {
   font-size: 3em;
+  display: flex; /* Enable flexbox for inline alignment */
+  align-items: center; /* Vertically align items in the center */
+  gap: 15px; /* Spacing between organization name and summary box */
 }
+
 
 .top-right-controls {
   display: flex;
@@ -23,4 +27,16 @@
   height: 1px;
   background: #ccc;
   margin: 10px 0;
+}
+
+.deal-summary-box {
+  background-color: #f0f0f0; /* Grey background */
+  color: #555;
+  padding: 8px 12px;
+  margin-right: 10px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  display: flex;
+  flex-direction: column; /* Stack the sums vertically */
+  gap: 5px;
 }
