@@ -44,16 +44,25 @@ const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({ selectedOrganizationI
     );
   };
 
+  const calculateStageTotal = (stage: Deal['status']): number => {
+    return dealsByStage[stage].reduce((sum, deal) => sum + deal.value, 0);
+  };
+
   return (
     <div className="deal-status-boxes-container">
       {activeFilterType === 'all' ? (
         dealStages.map(stage => (
           <div key={stage} className={`deal-status-box ${stage}`}>
             <h3>{stage.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h3>
-            <p className="deal-count">
-              {selectedOrganizationId != null && selectedOrganizationId !== 0 ? dealsByStage[stage].length : 0} Deals
-            </p>
-            <hr/>
+            <div className="stage-summary">
+              <span className="deal-count">
+                {selectedOrganizationId != null && selectedOrganizationId !== 0 ? dealsByStage[stage].length : 0} Deals
+              </span>
+              <span className="stage-total">
+                Total: ${calculateStageTotal(stage).toFixed(2)}
+              </span>
+            </div>
+            <hr />
             {renderDeals(stage)}
           </div>
         ))
@@ -63,10 +72,15 @@ const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({ selectedOrganizationI
           .map(stage => (
             <div key={stage} className={`deal-status-box filtered-stage ${stage}`}>
               <h3>{stage.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h3>
-              <p className="deal-count">
-                {selectedOrganizationId != null && selectedOrganizationId !== 0 ? dealsByStage[stage].length : 0} Deals
-              </p>
-              <hr/>
+              <div className="stage-summary">
+                <span className="deal-count">
+                  {selectedOrganizationId != null && selectedOrganizationId !== 0 ? dealsByStage[stage].length : 0} Deals
+                </span>
+                <span className="stage-total">
+                  Total: ${calculateStageTotal(stage).toFixed(2)}
+                </span>
+              </div>
+              <hr />
               {renderDeals(stage)}
             </div>
           ))

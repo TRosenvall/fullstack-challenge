@@ -22,8 +22,9 @@
 
 .deal-status-box h3 {
   margin-top: 0;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   font-size: 1.1em;
+  text-align: center;
 }
 
 .deal-status-box .deal-count {
@@ -35,6 +36,45 @@
 .deal-status-box.filtered-stage {
   width: calc(33.33% - 20px); /* Adjust for gap */
   min-width: auto; /* Override min-width */
+}
+
+.stage-summary {
+  display: flex;
+  justify-content: space-between; /* Put space between items */
+  align-items: center; /* Vertically align items */
+  margin-bottom: 10px; /* Add some space below the summary */
+}
+
+.deal-count {
+  text-align: left;
+  color: #777;
+  font-size: 0.9em;
+}
+
+.stage-total {
+  text-align: right;
+  font-weight: bold;
+  color: #007bff; /* Example color for total */
+  font-size: 0.9em;
+}
+
+.deal-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  font-size: 0.85em;
+  color: #555;
+}
+
+.deal-item .account-name {
+  text-align: left;
+  flex-grow: 1;
+}
+
+.deal-item .deal-value {
+  text-align: right;
+  font-weight: bold;
 }
 
 /* You can add specific styles for each stage if desired */
