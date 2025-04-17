@@ -36,7 +36,7 @@ const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({ selectedOrganizationI
           return (
             <li key={deal.id} className="deal-row">
               <span className="deal-account">{account?.name}</span>
-              <span className="deal-value">${deal.value.toLocaleString()}</span>
+              <span className="deal-value">${deal.value.toFixed(2).toLocaleString()}</span>
             </li>
           );
         })}
@@ -56,7 +56,8 @@ const DealStatusBoxes: React.FC<DealStatusBoxesProps> = ({ selectedOrganizationI
             <h3>{stage.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h3>
             <div className="stage-summary">
               <span className="deal-count">
-                {selectedOrganizationId != null && selectedOrganizationId !== 0 ? dealsByStage[stage].length : 0} Deals
+                {selectedOrganizationId != null && selectedOrganizationId !== 0 ? dealsByStage[stage].length : 0} 
+                {(selectedOrganizationId != null && selectedOrganizationId !== 0) && dealsByStage[stage].length === 1 ? " Deal" : " Deals"}
               </span>
               <span className="stage-total">
                 Total: ${calculateStageTotal(stage).toFixed(2)}
