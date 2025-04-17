@@ -3,6 +3,7 @@ import Dashboard from './Components/DealDashboard';
 import axios from 'axios';
 import './App.css';
 import { Organization } from './Models/organization';
+import { Account } from './Models/account';
 import { Deal } from './Models/deal';
 
 const App: React.FC = () => {
@@ -19,6 +20,22 @@ const App: React.FC = () => {
   const [resetDropdown, setResetDropdown] = useState<boolean>(false);
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const LOCAL_STORAGE_KEY = 'lastSelectedOrganizationId';
+  const [showNewDealModal, setShowNewDealModal] = useState<boolean>(false);
+  const [newDealCreationDate, setNewDealCreationDate] = useState<number | ''>(2025);
+  const [newAccountName, setNewAccountName] = useState<string>('');
+  const [newDealValue, setNewDealValue] = useState<number | ''>(0);
+  const [newDealStatus, setNewDealStatus] = useState<Deal['status']>('build_proposal');
+  const [selectedOrganizationAccounts, setOrganizationAccounts] = useState<Account[]>([]);
+  const [selectedOrganizationDeals, setOrganizationDeals] = useState<Deal[]>([]);
+  const DEAL_STATUS_OPTIONS: Deal['status'][] = [
+    'build_proposal',
+    'pitch_proposal',
+    'negotiation',
+    'awaiting_signoff',
+    'signed',
+    'cancelled',
+    'lost',
+  ];
 
   useEffect(() => {
     fetchOrganizations();
@@ -145,6 +162,93 @@ const App: React.FC = () => {
     }
   };
 
+  const handleCreateNewDealClick = () => {
+    setShowNewDealModal(true);
+  };
+
+  const handleCloseNewDealModal = () => {
+    setShowNewDealModal(false);
+    setNewDealCreationDate(2025);
+    setNewAccountName('');
+    setNewDealValue(0);
+  };
+
+  const handleNewDealCreationDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewDealCreationDate(event.target.value === '' ? '' : parseFloat(event.target.value));
+  };
+
+  const handleNewAccountNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewAccountName(event.target.value);
+  };
+
+  const handleNewDealValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewDealValue(event.target.value === '' ? '' : parseFloat(event.target.value));
+  };
+
+  const handleSaveNewDeal = async () => {
+    if (!newDealCreationDate || !newAccountName || !(typeof newDealValue === 'number')) {
+      alert("Please fill in all the details")
+    }
+    var accountNames: String[] = []
+    try {
+      accountNames = (await axios.get<Account[]>(`${apiUrl}/accounts`)).data.map(account => account.name);
+    } catch(error) {
+      alert("Unable to retrieve accounts");
+      alert(error);
+    }
+
+    if (!accountNames.includes(newAccountName)) {
+      try {
+      await axios.post<Account>(`${apiUrl}/accounts`, { name: newAccountName, organization_id: selectedOrganizationId });
+      } catch(error) {
+        alert("Unable to create new account")
+        alert(error);
+      }
+    }
+
+    var account: Account
+    try {
+      account = (await axios.get<Account[]>(`${apiUrl}/accounts`)).data.filter( account => account.name === newAccountName )[0];
+    } catch(error) {
+      alert("Unable to pull account")
+      alert(error)
+      return
+    }
+
+    try {
+      alert(account.id)
+      alert(newDealValue)
+      alert(newDealStatus)
+      alert(newDealCreationDate)
+      await axios.post<Deal>(`${apiUrl}/deals`, { account_id: account.id, value: newDealValue, status: newDealStatus, year_of_creation: newDealCreationDate });
+    } catch(error) {
+      alert("Unable to create new deal")
+      alert(error)
+    }
+
+    // Handle successful creation (e.g., refresh deals list, show success message)
+    fetchDeals();
+    handleCloseNewDealModal();
+  };
+
+  const fetchOrganizationAccounts = async () => {
+    try {
+      let organizationAccounts = (await axios.get<Account[]>(`${apiUrl}/accounts`)).data.filter(account => account.id === selectedOrganizationId)
+      setOrganizationAccounts(organizationAccounts)
+    } catch(error) {
+      alert(error)
+    }
+  }
+
+  const fetchOrganizationDeals = async() => {
+    try {
+      let organizationAccounts = await fetchOrganizationAccounts()
+      let deals = (await axios.get<Deal[]>(`${apiUrl}/deals`)).data
+    } catch(error) {
+      alert(error)
+    }
+  }
+
   return (
     <div className="app-container">
       <Dashboard
@@ -157,8 +261,46 @@ const App: React.FC = () => {
         deals={filteredDeals}
         onFilterByType={handleFilterByType}
         onFilterByYear={handleFilterByYear}
-        resetDropdown={resetDropdown} // Pass the new reset prop
+        resetDropdown={resetDropdown}
+        onCreateNewDealClick={handleCreateNewDealClick}
+        activeFilterType={filterType}
+        organizationAccounts={selectedOrganizationAccounts}
+        organizationDeals={selectedOrganizationDeals}
       />
+
+      {showNewDealModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Create New Deal & Account</h3>
+            <label htmlFor="account-name">Account Name:</label>
+            <input type="text" id="account-name" value={newAccountName} onChange={handleNewAccountNameChange} required />
+
+            <label htmlFor="deal-status">Deal Status:</label>
+            <select id="deal-status" value={newDealStatus} onChange={(e) => setNewDealStatus(e.target.value as Deal['status'])}>
+              {DEAL_STATUS_OPTIONS.map((status) => (
+                <option key={status} value={status}>
+                  {status.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                </option>
+              ))}
+            </select>
+
+            <div className="deal-creation-value-selector">
+              <label htmlFor="deal-value">Deal Value:</label>
+              <input type="number" id="deal-value" value={newDealValue} onChange={handleNewDealValueChange} required />
+            </div>
+
+            <div className="deal-creation-date-selector">
+              <label htmlFor="deal-creation-date">Deal Creation Year:</label>
+              <input type="number" id="deal-creation-date" value={newDealCreationDate} onChange={handleNewDealCreationDateChange} required />
+            </div>
+
+            <div className="modal-buttons">
+              <button onClick={handleSaveNewDeal}>Save Deal</button>
+              <button onClick={handleCloseNewDealModal}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showNewOrgModal && (
         <div className="modal-overlay">
