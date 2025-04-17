@@ -31,8 +31,8 @@ describe("Deals Model Unit Tests", () => {
     });
 
     test("should retrieve all existing deals", () => {
-      deals.create(accountId, 1000, 'build_proposal');
-      deals.create(accountId, 5000, 'negotiation');
+      deals.create(accountId, 1000, 'build_proposal', 1392);
+      deals.create(accountId, 5000, 'negotiation', 1294);
       const allDeals = deals.getAll();
       expect(allDeals.length).toBe(2);
       expect(allDeals.some((deal) => deal.value === 1000 && deal.status === 'build_proposal')).toBe(true);
@@ -44,7 +44,7 @@ describe("Deals Model Unit Tests", () => {
 
   describe("getById", () => {
     test("should retrieve a deal by its ID", () => {
-      const { lastInsertRowid } = deals.create(accountId, 2500, 'pitch_proposal');
+      const { lastInsertRowid } = deals.create(accountId, 2500, 'pitch_proposal', 1842);
       const deal = deals.getById(lastInsertRowid);
       expect(deal).toBeDefined();
       expect(deal?.value).toBe(2500);
@@ -60,7 +60,7 @@ describe("Deals Model Unit Tests", () => {
 
   describe("create", () => {
     test("should create a new deal and return its ID", () => {
-      const result = deals.create(accountId, 750, 'awaiting_signoff');
+      const result = deals.create(accountId, 750, 'awaiting_signoff', 293);
       expect(typeof result.lastInsertRowid).toBe("number");
       expect(result.lastInsertRowid).toBeGreaterThan(0);
 
@@ -74,7 +74,7 @@ describe("Deals Model Unit Tests", () => {
 
   describe("update", () => {
     test("should update an existing deal's value", () => {
-      const { lastInsertRowid } = deals.create(accountId, 1200, 'negotiation');
+      const { lastInsertRowid } = deals.create(accountId, 1200, 'negotiation', 1432);
       deals.update(lastInsertRowid, undefined, 1500);
       const updatedDeal = deals.getById(lastInsertRowid);
       expect(updatedDeal).toBeDefined();
@@ -82,7 +82,7 @@ describe("Deals Model Unit Tests", () => {
     });
 
     test("should update an existing deal's status", () => {
-      const { lastInsertRowid } = deals.create(accountId, 3000, 'build_proposal');
+      const { lastInsertRowid } = deals.create(accountId, 3000, 'build_proposal', 9342);
       deals.update(lastInsertRowid, undefined, undefined, 'signed');
       const updatedDeal = deals.getById(lastInsertRowid);
       expect(updatedDeal).toBeDefined();
@@ -90,7 +90,7 @@ describe("Deals Model Unit Tests", () => {
     });
 
     test("should update multiple fields of an existing deal", () => {
-      const { lastInsertRowid } = deals.create(accountId, 2000, 'pitch_proposal');
+      const { lastInsertRowid } = deals.create(accountId, 2000, 'pitch_proposal', 1234);
       deals.update(lastInsertRowid, undefined, 2200, 'negotiation');
       const updatedDeal = deals.getById(lastInsertRowid);
       expect(updatedDeal).toBeDefined();
@@ -105,18 +105,18 @@ describe("Deals Model Unit Tests", () => {
     });
 
     test("should return a changes count of 0 if no updates are provided", () => {
-      const { lastInsertRowid } = deals.create(accountId, 500, 'build_proposal');
+      const { lastInsertRowid } = deals.create(accountId, 500, 'build_proposal', 2020);
       const result = deals.update(lastInsertRowid);
       expect(result.changes).toBe(0);
       const deal = deals.getById(lastInsertRowid);
-      expect(deal?.value).toBe(500); // Ensure no changes occurred
+      expect(deal?.value).toBe(500);
       expect(deal?.status).toBe('build_proposal');
     });
   });
 
   describe("delete", () => {
     test("should delete a deal by its ID", () => {
-      const { lastInsertRowid } = deals.create(accountId, 1800, 'awaiting_signoff');
+      const { lastInsertRowid } = deals.create(accountId, 1800, 'awaiting_signoff', 1994);
       deals.delete(lastInsertRowid);
       const deletedDeal = deals.getById(lastInsertRowid);
       expect(deletedDeal).toBeUndefined();

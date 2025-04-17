@@ -6,6 +6,7 @@ export interface Deal {
   account_id: number;
   value: number;
   status: 'build_proposal' | 'pitch_proposal' | 'negotiation' | 'awaiting_signoff' | 'signed' | 'cancelled' | 'lost';
+  year_of_creation: number;
   created_at: Date;
   updated_at: Date;
 }
@@ -16,16 +17,17 @@ export const Deals = (db: Database.Database) => ({
   getById: (id: number | BigInt): Deal | undefined =>
     db.prepare("SELECT * FROM deals WHERE id = ?").get(id) as Deal | undefined,
 
-  create: (account_id: number | BigInt, value: number, status: Deal['status']) =>
+  create: (account_id: number | BigInt, value: number, status: Deal['status'], year_of_creation: number) =>
     db
-      .prepare("INSERT INTO deals (account_id, value, status) VALUES (?, ?, ?)")
-      .run(account_id, value, status),
+      .prepare("INSERT INTO deals (account_id, value, status, year_of_creation) VALUES (?, ?, ?, ?)")
+      .run(account_id, value, status, year_of_creation),
 
   update: (
     id: number | BigInt,
     accountId?: number | BigInt,
     value?: number,
-    status?: Deal['status']
+    status?: Deal['status'],
+    year_of_creation?: number,
   ) => {
     const updates: string[] = [];
     const params: any[] = [];
@@ -41,6 +43,10 @@ export const Deals = (db: Database.Database) => ({
     if (status !== undefined) {
       updates.push("status = ?");
       params.push(status);
+    }
+    if (year_of_creation !== undefined) {
+      updates.push("year_of_creation = ?");
+      params.push(year_of_creation)
     }
 
     if (updates.length === 0) {

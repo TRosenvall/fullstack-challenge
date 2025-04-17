@@ -1,6 +1,7 @@
 import { Request, Response, Router } from 'express';
 import Database from 'better-sqlite3';
 import { Deals, Deal } from '../models/dealModel';
+import { error } from 'console';
 
 const router = Router();
 let dealsModel: ReturnType<typeof Deals>;
@@ -41,7 +42,7 @@ export default (db: Database.Database) => {
 
   // POST a new deal
   router.post('/', async (req: Request, res: Response) => {
-    const { account_id, value, status } = req.body;
+    const { account_id, value, status, year_of_creation } = req.body;
 
     if (!account_id || typeof account_id !== 'number') {
       res.status(400).json({ error: 'Account ID is required and must be a number' });
@@ -59,11 +60,17 @@ export default (db: Database.Database) => {
       return;
     }
 
+    if (!year_of_creation || typeof year_of_creation !== 'number') {
+      res.status(400).json({ error: 'Year of creation of deal is required and must be a number'});
+      return
+    }
+
     try {
       const result = dealsModel.create(
         account_id,
         value,
-        status as Deal['status'] // Still need assertion here after validation
+        status as Deal['status'],
+        year_of_creation
       );
       res.status(201).json({ id: result.lastInsertRowid, account_id, value, status });
     } catch (error) {

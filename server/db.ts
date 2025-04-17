@@ -44,6 +44,7 @@ function initializeDatabase() {
           'cancelled',
           'lost'
       )),
+      year_of_creation INTEGER NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );

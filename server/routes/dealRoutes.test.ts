@@ -52,6 +52,7 @@ describe('Deal API Endpoints', () => {
             'cancelled',
             'lost'
         )),
+        year_of_creation INTEGER NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (account_id) REFERENCES account(id)
@@ -75,8 +76,8 @@ describe('Deal API Endpoints', () => {
     });
 
     it('should return a list of deals', async () => {
-      dealsModel.create(accountId, 1000, 'build_proposal');
-      dealsModel.create(accountId, 2500, 'negotiation');
+      dealsModel.create(accountId, 1000, 'build_proposal', 2);
+      dealsModel.create(accountId, 2500, 'negotiation', 1);
 
       const res = await request(app).get('/deals');
       expect(res.statusCode).toEqual(200);
@@ -98,7 +99,7 @@ describe('Deal API Endpoints', () => {
 
   describe('GET /deals/:id', () => {
     it('should return a specific deal by ID', async () => {
-      const createResult = dealsModel.create(accountId, 5000, 'signed');
+      const createResult = dealsModel.create(accountId, 5000, 'signed', 9423);
       const dealId = createResult.lastInsertRowid;
 
       const res = await request(app).get(`/deals/${dealId}`);
@@ -127,7 +128,7 @@ describe('Deal API Endpoints', () => {
 
   describe('POST /deals', () => {
     it('should create a new deal', async () => {
-      const newDeal = { account_id: accountId, value: 750, status: 'build_proposal' };
+      const newDeal = { account_id: accountId, value: 750, status: 'build_proposal', year_of_creation: 2025 };
       const res = await request(app)
         .post('/deals')
         .send(newDeal);
@@ -204,7 +205,7 @@ describe('Deal API Endpoints', () => {
   describe('PUT /deals/:id', () => {
     let dealIdToUpdate: number | bigint;
     beforeEach(async () => {
-      const createResult = dealsModel.create(accountId, 1500, 'pitch_proposal');
+      const createResult = dealsModel.create(accountId, 1500, 'pitch_proposal', 1234);
       dealIdToUpdate = createResult.lastInsertRowid;
     });
 
@@ -333,7 +334,7 @@ describe('Deal API Endpoints', () => {
   describe('DELETE /deals/:id', () => {
     let dealIdToDelete: number | bigint;
     beforeEach(async () => {
-      const createResult = dealsModel.create(accountId, 3000, 'signed');
+      const createResult = dealsModel.create(accountId, 3000, 'signed', 415);
       dealIdToDelete = createResult.lastInsertRowid;
     });
 
