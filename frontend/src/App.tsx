@@ -12,7 +12,10 @@ const App: React.FC = () => {
   const [showNewOrgModal, setShowNewOrgModal] = useState<boolean>(false);
   const [newOrgName, setNewOrgName] = useState<string>('');
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
-  const [deals, setDeals] = useState<Deal[]>([]);
+  const [allDeals, setAllDeals] = useState<Deal[]>([]); // Store all fetched deals
+  const [filteredDeals, setFilteredDeals] = useState<Deal[]>([]); // Store deals after filtering
+  const [filterType, setFilterType] = useState<Deal['status'] | 'all'>('all');
+  const [filterYear, setFilterYear] = useState<number | 'all'>('all');
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const LOCAL_STORAGE_KEY = 'lastSelectedOrganizationId';
 
@@ -28,6 +31,10 @@ const App: React.FC = () => {
     }
   }, [organizations]);
 
+  useEffect(() => {
+    applyFilters(); // Apply filters whenever allDeals or filter values change
+  }, [allDeals, filterType, filterYear]);
+
   const fetchOrganizations = async () => {
     try {
       const response = await axios.get<Organization[]>(`${apiUrl}/organizations`);
@@ -40,7 +47,8 @@ const App: React.FC = () => {
   const fetchDeals = async () => {
     try {
       const response = await axios.get<Deal[]>(`${apiUrl}/deals`);
-      setDeals(response.data);
+      // Assuming your Deal interface has an 'updated_at' property (e.g., a string in ISO format)
+      setAllDeals(response.data);
     } catch (error) {
       console.error('Error fetching deals:', error);
     }
@@ -52,7 +60,29 @@ const App: React.FC = () => {
     const selectedOrg = organizations.find(org => org.id === selectedId);
     setSelectedOrganizationName(selectedOrg ? selectedOrg.name : "Organization");
     localStorage.setItem(LOCAL_STORAGE_KEY, selectedId.toString());
-    // TODO: - Filtering
+    // In the future, you might want to filter deals based on the selected organization here
+  };
+
+  const handleFilterByType = (type: Deal['status'] | 'all') => {
+    setFilterType(type);
+  };
+
+  const handleFilterByYear = (year: number | 'all') => {
+    setFilterYear(year);
+  };
+
+  const applyFilters = () => {
+    let filtered = [...allDeals];
+
+    if (filterType !== 'all') {
+      filtered = filtered.filter(deal => deal.status === filterType);
+    }
+
+    if (filterYear !== 'all') {
+      filtered = filtered.filter(deal => new Date(deal.updated_at).getFullYear() === filterYear);
+    }
+
+    setFilteredDeals(filtered);
   };
 
   const handleNewOrganizationClick = () => {
@@ -116,7 +146,9 @@ const App: React.FC = () => {
         onOrganizationChange={handleOrganizationChange}
         onNewOrganizationClick={handleNewOrganizationClick}
         onDeleteOrganizationClick={handleDeleteOrganizationClick}
-        deals={deals}
+        deals={filteredDeals}
+        onFilterByType={handleFilterByType}
+        onFilterByYear={handleFilterByYear}
       />
 
       {showNewOrgModal && (

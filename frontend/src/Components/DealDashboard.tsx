@@ -1,33 +1,38 @@
 import React from 'react';
 import OrganizationDropdown from './OrganizationDropDown';
-import DealStatusBoxes from './DealStatusBoxes';
-import { Deal } from '../Models/deal';
 import './DealDashboard.css';
+import DealStatusBoxes from './DealStatusBoxes';
+import DealFilters from './DealFilters'; // Import the new component
+import { Deal } from '../Models/deal';
 
 interface DashboardProps {
   organizations: { id: number; name: string }[];
   selectedOrganizationId: number | null;
-  selectedOrganizationName: string; // Add this prop
+  selectedOrganizationName: string;
   onOrganizationChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   onNewOrganizationClick: () => void;
   onDeleteOrganizationClick: () => void;
   deals: Deal[];
+  onFilterByType: (type: Deal['status'] | 'all') => void;
+  onFilterByYear: (year: number | 'all') => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
   organizations,
   selectedOrganizationId,
-  selectedOrganizationName, // Use this prop
+  selectedOrganizationName,
   onOrganizationChange,
   onNewOrganizationClick,
   onDeleteOrganizationClick,
   deals,
+  onFilterByType,
+  onFilterByYear,
 }) => {
   return (
     <div className="dashboard-container">
       <div className="top-bar">
         <div className="top-left-organization">
-          <strong>{selectedOrganizationName}</strong> {/* Display selected name */}
+          <strong>{selectedOrganizationName}</strong>
         </div>
         <div className="top-right-controls">
           <OrganizationDropdown
@@ -40,6 +45,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
       <hr />
+      <DealFilters onFilterByType={onFilterByType} onFilterByYear={onFilterByYear} deals={deals} />
       <DealStatusBoxes deals={deals} />
     </div>
   );
