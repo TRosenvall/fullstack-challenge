@@ -3,6 +3,7 @@ import './OrganizationDropdown.css';
 
 interface OrganizationDropdownProps {
   organizations: { id: number; name: string }[];
+  selectedOrganizationId: number | null;
   onOrganizationChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   onNewOrganizationClick: () => void;
   onDeleteOrganizationClick: () => void;
@@ -10,13 +11,14 @@ interface OrganizationDropdownProps {
 
 const OrganizationDropdown: React.FC<OrganizationDropdownProps> = ({
   organizations,
+  selectedOrganizationId,
   onOrganizationChange,
   onNewOrganizationClick,
   onDeleteOrganizationClick,
 }) => {
   return (
     <div className="organization-dropdown-container">
-      <select onChange={onOrganizationChange} defaultValue="">
+      <select onChange={onOrganizationChange} defaultValue={selectedOrganizationId === null ? "" : selectedOrganizationId}>
         <option value="" disabled>Select Organization</option>
         {organizations.map((org) => (
           <option key={org.id} value={org.id}>
@@ -24,8 +26,10 @@ const OrganizationDropdown: React.FC<OrganizationDropdownProps> = ({
           </option>
         ))}
       </select>
-      <button onClick={onNewOrganizationClick}>+</button>
-      <button onClick={onDeleteOrganizationClick}>-</button>
+      <div className="organization-buttons">
+        <button onClick={onNewOrganizationClick}>+</button>
+        <button onClick={onDeleteOrganizationClick}>-</button>
+      </div>
     </div>
   );
 };
