@@ -1,0 +1,17 @@
+.dashboard-container {
+  position: relative; /* Make the container a positioning context for absolute elements inside */
+  padding: 20px;
+}
+
+.top-left-organization {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 3em;
+}
+
+.top-right-controls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}

@@ -1,0 +1,24 @@
+.organization-dropdown-container {
+  display: flex;
+  align-items: center;
+}
+
+.organization-dropdown-container select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.organization-dropdown-container button {
+  padding: 8px 12px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+.organization-dropdown-container button:hover {
+  background-color: #e0e0e0;
+}
